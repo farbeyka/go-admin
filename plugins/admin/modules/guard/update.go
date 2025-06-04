@@ -3,9 +3,9 @@ package guard
 import (
 	"net/http"
 
-	"github.com/GoAdminGroup/go-admin/context"
-	"github.com/GoAdminGroup/go-admin/plugins/admin/modules/form"
-	"github.com/GoAdminGroup/go-admin/plugins/admin/modules/table"
+	"github.com/farbeyka/go-admin/context"
+	"github.com/farbeyka/go-admin/plugins/admin/modules/form"
+	"github.com/farbeyka/go-admin/plugins/admin/modules/table"
 )
 
 type UpdateParam struct {

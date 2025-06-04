@@ -1,9 +1,9 @@
 package display
 
 import (
-	"github.com/GoAdminGroup/go-admin/context"
-	"github.com/GoAdminGroup/go-admin/template/icon"
-	"github.com/GoAdminGroup/go-admin/template/types"
+	"github.com/farbeyka/go-admin/context"
+	"github.com/farbeyka/go-admin/template/icon"
+	"github.com/farbeyka/go-admin/template/types"
 )
 
 type Icon struct {

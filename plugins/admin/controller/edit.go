@@ -6,23 +6,23 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/GoAdminGroup/go-admin/modules/logger"
+	"github.com/farbeyka/go-admin/modules/logger"
 
-	"github.com/GoAdminGroup/go-admin/template"
+	"github.com/farbeyka/go-admin/template"
 
-	"github.com/GoAdminGroup/go-admin/plugins/admin/modules/response"
+	"github.com/farbeyka/go-admin/plugins/admin/modules/response"
 
-	"github.com/GoAdminGroup/go-admin/context"
-	"github.com/GoAdminGroup/go-admin/modules/auth"
-	"github.com/GoAdminGroup/go-admin/modules/file"
-	"github.com/GoAdminGroup/go-admin/modules/language"
-	"github.com/GoAdminGroup/go-admin/plugins/admin/modules"
-	"github.com/GoAdminGroup/go-admin/plugins/admin/modules/constant"
-	form2 "github.com/GoAdminGroup/go-admin/plugins/admin/modules/form"
-	"github.com/GoAdminGroup/go-admin/plugins/admin/modules/guard"
-	"github.com/GoAdminGroup/go-admin/plugins/admin/modules/parameter"
-	"github.com/GoAdminGroup/go-admin/template/types"
-	"github.com/GoAdminGroup/go-admin/template/types/form"
+	"github.com/farbeyka/go-admin/context"
+	"github.com/farbeyka/go-admin/modules/auth"
+	"github.com/farbeyka/go-admin/modules/file"
+	"github.com/farbeyka/go-admin/modules/language"
+	"github.com/farbeyka/go-admin/plugins/admin/modules"
+	"github.com/farbeyka/go-admin/plugins/admin/modules/constant"
+	form2 "github.com/farbeyka/go-admin/plugins/admin/modules/form"
+	"github.com/farbeyka/go-admin/plugins/admin/modules/guard"
+	"github.com/farbeyka/go-admin/plugins/admin/modules/parameter"
+	"github.com/farbeyka/go-admin/template/types"
+	"github.com/farbeyka/go-admin/template/types/form"
 )
 
 // ShowForm show form page.

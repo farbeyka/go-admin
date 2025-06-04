@@ -6,9 +6,9 @@ import (
 	"html/template"
 	"strings"
 
-	"github.com/GoAdminGroup/go-admin/context"
-	"github.com/GoAdminGroup/go-admin/modules/config"
-	"github.com/GoAdminGroup/go-admin/template/types/form"
+	"github.com/farbeyka/go-admin/context"
+	"github.com/farbeyka/go-admin/modules/config"
+	"github.com/farbeyka/go-admin/template/types/form"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )

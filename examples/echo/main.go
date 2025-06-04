@@ -6,17 +6,17 @@ import (
 	"os/signal"
 	"time"
 
-	_ "github.com/GoAdminGroup/go-admin/adapter/echo"
-	_ "github.com/GoAdminGroup/go-admin/modules/db/drivers/mysql"
+	_ "github.com/farbeyka/go-admin/adapter/echo"
+	_ "github.com/farbeyka/go-admin/modules/db/drivers/mysql"
 	_ "github.com/GoAdminGroup/themes/adminlte"
 
-	"github.com/GoAdminGroup/go-admin/engine"
-	"github.com/GoAdminGroup/go-admin/examples/datamodel"
-	"github.com/GoAdminGroup/go-admin/modules/config"
-	"github.com/GoAdminGroup/go-admin/modules/language"
-	"github.com/GoAdminGroup/go-admin/plugins/example"
-	"github.com/GoAdminGroup/go-admin/template"
-	"github.com/GoAdminGroup/go-admin/template/chartjs"
+	"github.com/farbeyka/go-admin/engine"
+	"github.com/farbeyka/go-admin/examples/datamodel"
+	"github.com/farbeyka/go-admin/modules/config"
+	"github.com/farbeyka/go-admin/modules/language"
+	"github.com/farbeyka/go-admin/plugins/example"
+	"github.com/farbeyka/go-admin/template"
+	"github.com/farbeyka/go-admin/template/chartjs"
 	"github.com/labstack/echo/v4"
 )
 

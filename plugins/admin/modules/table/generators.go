@@ -11,25 +11,25 @@ import (
 	"strings"
 	"time"
 
-	"github.com/GoAdminGroup/go-admin/context"
-	"github.com/GoAdminGroup/go-admin/modules/collection"
-	"github.com/GoAdminGroup/go-admin/modules/config"
-	"github.com/GoAdminGroup/go-admin/modules/db"
-	"github.com/GoAdminGroup/go-admin/modules/db/dialect"
-	errs "github.com/GoAdminGroup/go-admin/modules/errors"
-	"github.com/GoAdminGroup/go-admin/modules/language"
-	"github.com/GoAdminGroup/go-admin/modules/logger"
-	"github.com/GoAdminGroup/go-admin/modules/ui"
-	"github.com/GoAdminGroup/go-admin/modules/utils"
-	"github.com/GoAdminGroup/go-admin/plugins/admin/models"
-	form2 "github.com/GoAdminGroup/go-admin/plugins/admin/modules/form"
-	"github.com/GoAdminGroup/go-admin/plugins/admin/modules/parameter"
-	"github.com/GoAdminGroup/go-admin/plugins/admin/modules/tools"
-	"github.com/GoAdminGroup/go-admin/template"
-	"github.com/GoAdminGroup/go-admin/template/types"
-	"github.com/GoAdminGroup/go-admin/template/types/action"
-	"github.com/GoAdminGroup/go-admin/template/types/form"
-	selection "github.com/GoAdminGroup/go-admin/template/types/form/select"
+	"github.com/farbeyka/go-admin/context"
+	"github.com/farbeyka/go-admin/modules/collection"
+	"github.com/farbeyka/go-admin/modules/config"
+	"github.com/farbeyka/go-admin/modules/db"
+	"github.com/farbeyka/go-admin/modules/db/dialect"
+	errs "github.com/farbeyka/go-admin/modules/errors"
+	"github.com/farbeyka/go-admin/modules/language"
+	"github.com/farbeyka/go-admin/modules/logger"
+	"github.com/farbeyka/go-admin/modules/ui"
+	"github.com/farbeyka/go-admin/modules/utils"
+	"github.com/farbeyka/go-admin/plugins/admin/models"
+	form2 "github.com/farbeyka/go-admin/plugins/admin/modules/form"
+	"github.com/farbeyka/go-admin/plugins/admin/modules/parameter"
+	"github.com/farbeyka/go-admin/plugins/admin/modules/tools"
+	"github.com/farbeyka/go-admin/template"
+	"github.com/farbeyka/go-admin/template/types"
+	"github.com/farbeyka/go-admin/template/types/action"
+	"github.com/farbeyka/go-admin/template/types/form"
+	selection "github.com/farbeyka/go-admin/template/types/form/select"
 	"github.com/GoAdminGroup/html"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/text/cases"
@@ -1498,10 +1498,10 @@ func (s *SystemTable) GetGenerateForm(ctx *context.Context) (generateTool Table)
 			{Text: "time", Value: "time"},
 			{Text: "log", Value: "log"},
 			{Text: "fmt", Value: "fmt"},
-			{Text: "github.com/GoAdminGroup/go-admin/modules/db/dialect", Value: "github.com/GoAdminGroup/go-admin/modules/db/dialect"},
-			{Text: "github.com/GoAdminGroup/go-admin/modules/db", Value: "github.com/GoAdminGroup/go-admin/modules/db"},
-			{Text: "github.com/GoAdminGroup/go-admin/modules/language", Value: "github.com/GoAdminGroup/go-admin/modules/language"},
-			{Text: "github.com/GoAdminGroup/go-admin/modules/logger", Value: "github.com/GoAdminGroup/go-admin/modules/logger"},
+			{Text: "github.com/farbeyka/go-admin/modules/db/dialect", Value: "github.com/farbeyka/go-admin/modules/db/dialect"},
+			{Text: "github.com/farbeyka/go-admin/modules/db", Value: "github.com/farbeyka/go-admin/modules/db"},
+			{Text: "github.com/farbeyka/go-admin/modules/language", Value: "github.com/farbeyka/go-admin/modules/language"},
+			{Text: "github.com/farbeyka/go-admin/modules/logger", Value: "github.com/farbeyka/go-admin/modules/logger"},
 		}).
 		FieldDefault("").
 		FieldOptionExt(map[string]interface{}{

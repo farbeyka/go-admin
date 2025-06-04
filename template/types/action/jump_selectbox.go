@@ -3,7 +3,7 @@ package action
 import (
 	"html/template"
 
-	"github.com/GoAdminGroup/go-admin/context"
+	"github.com/farbeyka/go-admin/context"
 )
 
 type JumpSelectBoxAction struct {

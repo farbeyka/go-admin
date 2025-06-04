@@ -1,4 +1,4 @@
-module github.com/GoAdminGroup/go-admin
+module github.com/farbeyka/go-admin
 
 go 1.22.10
 

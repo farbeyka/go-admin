@@ -7,7 +7,7 @@ package db
 import (
 	"database/sql"
 
-	"github.com/GoAdminGroup/go-admin/modules/config"
+	"github.com/farbeyka/go-admin/modules/config"
 )
 
 // Sqlite is a Connection of sqlite.
