@@ -45,11 +45,43 @@ func NewSystemTable(conn db.Connection, c *config.Config) *SystemTable {
 	return &SystemTable{conn: conn, c: c}
 }
 
-
 var filterType = types.FilterType{NoIcon: true, HeadWidth: 4, InputWidth: 8}
 
 func (s *SystemTable) GetManagerTable(ctx *context.Context) (managerTable Table) {
 	managerTable = NewDefaultTable(ctx, DefaultConfigWithDriver(config.GetDatabases().GetDefault().Driver))
+
+	formList := managerTable.GetForm()
+
+	formList.SetPostValidator(func(values form.Values) error {
+		password := values.Get("password")
+		if len(password) < 8 {
+			return errors.New("Пароль должен содержать не менее 8 символов")
+		}
+
+		hasUpper, _ := regexp.MatchString(`[A-Z]`, password)
+		hasLower, _ := regexp.MatchString(`[a-z]`, password)
+		hasDigit, _ := regexp.MatchString(`\d`, password)
+		hasSpecial, _ := regexp.MatchString(`[^a-zA-Z0-9]`, password)
+
+		if !hasUpper || !hasLower || !hasDigit || !hasSpecial {
+			return errors.New("Пароль должен содержать заглавные и строчные буквы, цифры и специальные символы")
+		}
+
+		weakParts := []string{"qwerty", "12345", "123456789", "password", "admin", "abcdef"}
+		passLower := strings.ToLower(password)
+		for _, part := range weakParts {
+			if strings.Contains(passLower, part) {
+				return errors.New("Пароль слишком простой (содержит общеизвестные шаблоны)")
+			}
+		}
+
+		confirm := values.Get("password_again")
+		if password != confirm {
+			return errors.New("Пароль и подтверждение пароля не совпадают")
+		}
+
+		return nil
+	})
 
 	info := managerTable.GetInfo().AddXssJsFilter().SetFilterFormLayout(form.LayoutFilter)
 
