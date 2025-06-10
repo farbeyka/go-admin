@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/GoAdminGroup/html"
 	"github.com/farbeyka/go-admin/context"
 	"github.com/farbeyka/go-admin/modules/collection"
 	"github.com/farbeyka/go-admin/modules/config"
@@ -30,7 +31,6 @@ import (
 	"github.com/farbeyka/go-admin/template/types/action"
 	"github.com/farbeyka/go-admin/template/types/form"
 	selection "github.com/farbeyka/go-admin/template/types/form/select"
-	"github.com/GoAdminGroup/html"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/text/cases"
 	textLang "golang.org/x/text/language"
@@ -47,37 +47,71 @@ func NewSystemTable(conn db.Connection, c *config.Config) *SystemTable {
 
 var filterType = types.FilterType{NoIcon: true, HeadWidth: 4, InputWidth: 8}
 
+func ValidatePassword(s *SystemTable, userId int64, password string) error {
+	if len(password) < 8 {
+		return errors.New("Password must be at least 8 characters long")
+	}
+
+	hasUpper, _ := regexp.MatchString(`[A-Z]`, password)
+	hasLower, _ := regexp.MatchString(`[a-z]`, password)
+	hasDigit, _ := regexp.MatchString(`\d`, password)
+	hasSpecial, _ := regexp.MatchString(`[^a-zA-Z0-9]`, password)
+
+	if !hasUpper || !hasLower || !hasDigit || !hasSpecial {
+		return errors.New("Password must contain uppercase and lowercase letters, digits, and special characters")
+	}
+
+	weakParts := []string{"qwerty", "12345", "123456789", "password", "admin", "abcdef"}
+	passLower := strings.ToLower(password)
+	for _, part := range weakParts {
+		if strings.Contains(passLower, part) {
+			return errors.New("Password is too weak (contains common patterns)")
+		}
+	}
+
+	_, err := s.connection().WithTransaction(func(tx *sql.Tx) (error, map[string]interface{}) {
+		results, err := s.connection().WithTx(tx).
+			Table("user_password_history").
+			Where("user_id", "=", userId).
+			OrderBy("created_at", "desc").
+			All()
+
+		if err != nil {
+			return errors.New("failed to retrieve password history from database"), nil
+		}
+
+		for _, row := range results {
+			hash, ok := row["password_hash"].(string)
+			if !ok {
+				continue
+			}
+			if bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil {
+				return errors.New("You cannot reuse one of the last 10 passwords"), nil
+			}
+		}
+
+		return nil, nil
+	})
+
+	return err
+}
+
 func (s *SystemTable) GetManagerTable(ctx *context.Context) (managerTable Table) {
 	managerTable = NewDefaultTable(ctx, DefaultConfigWithDriver(config.GetDatabases().GetDefault().Driver))
 
 	formList := managerTable.GetForm()
 
-	formList.SetPostValidator(func(values form.Values) error {
+	formList.SetPostValidator(func(values form2.Values) error {
 		password := values.Get("password")
-		if len(password) < 8 {
-			return errors.New("Пароль должен содержать не менее 8 символов")
-		}
+		user := models.UserWithId(values.Get("id")).SetConn(s.conn)
 
-		hasUpper, _ := regexp.MatchString(`[A-Z]`, password)
-		hasLower, _ := regexp.MatchString(`[a-z]`, password)
-		hasDigit, _ := regexp.MatchString(`\d`, password)
-		hasSpecial, _ := regexp.MatchString(`[^a-zA-Z0-9]`, password)
-
-		if !hasUpper || !hasLower || !hasDigit || !hasSpecial {
-			return errors.New("Пароль должен содержать заглавные и строчные буквы, цифры и специальные символы")
-		}
-
-		weakParts := []string{"qwerty", "12345", "123456789", "password", "admin", "abcdef"}
-		passLower := strings.ToLower(password)
-		for _, part := range weakParts {
-			if strings.Contains(passLower, part) {
-				return errors.New("Пароль слишком простой (содержит общеизвестные шаблоны)")
-			}
+		if err := ValidatePassword(s, user.Id, password); err != nil {
+			return err
 		}
 
 		confirm := values.Get("password_again")
 		if password != confirm {
-			return errors.New("Пароль и подтверждение пароля не совпадают")
+			return errors.New("password and confirmation do not match")
 		}
 
 		return nil
@@ -159,13 +193,21 @@ func (s *SystemTable) GetManagerTable(ctx *context.Context) (managerTable Table)
 					return deleteUserErr, nil
 				}
 
+				deleteUserPasswordHistoryErr := s.connection().WithTx(tx).
+					Table("user_password_history").
+					WhereIn("user_id", ids).
+					Delete()
+
+				if db.CheckError(deleteUserPasswordHistoryErr, db.DELETE) {
+					return deleteUserPasswordHistoryErr, nil
+				}
 				return nil, nil
 			})
 
 			return txErr
 		})
 
-	formList := managerTable.GetForm().AddXssJsFilter()
+	formList = managerTable.GetForm().AddXssJsFilter()
 
 	formList.AddField("ID", "id", db.Int, form.Default).FieldDisplayButCanNotEditWhenUpdate().FieldDisableWhenCreate()
 	formList.AddField(lg("Name"), "username", db.Varchar, form.Text).
@@ -228,6 +270,10 @@ func (s *SystemTable) GetManagerTable(ctx *context.Context) (managerTable Table)
 		password := values.Get("password")
 
 		if password != "" {
+
+			if err := ValidatePassword(s, user.Id, password); err != nil {
+				return err
+			}
 
 			if password != values.Get("password_again") {
 				return errors.New("password does not match")
@@ -459,6 +505,16 @@ func (s *SystemTable) GetNormalManagerTable(ctx *context.Context) (managerTable 
 					return deleteUserPermissionErr, nil
 				}
 
+				deleteUserPasswordHistoryErr := s.connection().WithTx(tx).
+					Table("user_password_history").
+					WhereIn("user_id", ids).
+					Delete()
+				logger.Info("delete from password_history")
+
+				if db.CheckError(deleteUserPasswordHistoryErr, db.DELETE) {
+					return deleteUserPasswordHistoryErr, nil
+				}
+
 				deleteUserErr := s.connection().WithTx(tx).
 					Table("goadmin_users").
 					WhereIn("id", ids).
@@ -506,6 +562,9 @@ func (s *SystemTable) GetNormalManagerTable(ctx *context.Context) (managerTable 
 
 		if password != "" {
 
+			if err := ValidatePassword(s, user.Id, password); err != nil {
+				return err
+			}
 			if password != values.Get("password_again") {
 				return errors.New("password does not match")
 			}

@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"fmt"
 	"net/url"
 	"regexp"
 	"strconv"
@@ -372,6 +373,18 @@ func (t UserModel) New(username, password, name, avatar string) (UserModel, erro
 	t.Password = password
 	t.Avatar = avatar
 	t.Name = name
+
+	if err != nil {
+		return t, err
+	}
+	_, err = t.WithTx(t.Tx).Table("user_password_history").Insert(dialect.H{
+		"user_id":       t.Id,
+		"password_hash": t.Password,
+	})
+
+	if err != nil {
+		return t, fmt.Errorf("failed to save the password to database: %w", err)
+	}
 
 	return t, err
 }

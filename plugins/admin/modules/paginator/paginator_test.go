@@ -5,7 +5,7 @@ import (
 
 	"github.com/farbeyka/go-admin/modules/config"
 	"github.com/farbeyka/go-admin/plugins/admin/modules/parameter"
-	_ "github.com/GoAdminGroup/themes/sword"
+	_ "github.com/farbeyka/themes/sword"
 )
 
 func TestGet(t *testing.T) {
