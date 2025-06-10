@@ -54,7 +54,7 @@ const loginTmpl = `{{define "login_theme1"}}
         <div class="row" style="padding-top: 60px; clear: both;">
             <div class="col-md-12 text-center">
                 <p>
-                    <small>&copy; All Rights Reserved. GoAdmin</small>
+                    <small>&copy; 2025, JSC 'State Technical Service'</small>
                 </p>
             </div>
         </div>
