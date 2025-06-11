@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	tmpl "html/template"
+	"log"
 	"net/url"
 	"regexp"
 	"strconv"
@@ -46,6 +47,23 @@ func NewSystemTable(conn db.Connection, c *config.Config) *SystemTable {
 }
 
 var filterType = types.FilterType{NoIcon: true, HeadWidth: 4, InputWidth: 8}
+
+func InsertPasswordHistory(s *SystemTable, userId int64, passwordHash string) error {
+	_, err := s.connection().WithTransaction(func(tx *sql.Tx) (error, map[string]interface{}) {
+		_, err := s.connection().WithTx(tx).
+			Table("user_password_history").
+			Insert(dialect.H{
+				"user_id":       userId,
+				"password_hash": passwordHash,
+			})
+		if err != nil {
+			return fmt.Errorf("failed to save the password to database: %w", err), nil
+		}
+		return nil, nil
+	})
+
+	return err
+}
 
 func ValidatePassword(s *SystemTable, userId int64, password string) error {
 	if len(password) < 8 {
@@ -113,7 +131,6 @@ func (s *SystemTable) GetManagerTable(ctx *context.Context) (managerTable Table)
 		if password != confirm {
 			return errors.New("password and confirmation do not match")
 		}
-
 		return nil
 	})
 
@@ -270,16 +287,18 @@ func (s *SystemTable) GetManagerTable(ctx *context.Context) (managerTable Table)
 		password := values.Get("password")
 
 		if password != "" {
-
+			if password != values.Get("password_again") {
+				return errors.New("password does not match")
+			}
 			if err := ValidatePassword(s, user.Id, password); err != nil {
 				return err
 			}
 
-			if password != values.Get("password_again") {
-				return errors.New("password does not match")
-			}
-
 			password = encodePassword([]byte(values.Get("password")))
+			if err := InsertPasswordHistory(s, user.Id, password); err != nil {
+				log.Printf("failed to save password history: %v", err)
+				return err
+			}
 		}
 
 		_, txErr := s.connection().WithTransaction(func(tx *sql.Tx) (e error, i map[string]interface{}) {
@@ -561,15 +580,19 @@ func (s *SystemTable) GetNormalManagerTable(ctx *context.Context) (managerTable 
 		password := values.Get("password")
 
 		if password != "" {
-
-			if err := ValidatePassword(s, user.Id, password); err != nil {
-				return err
-			}
 			if password != values.Get("password_again") {
 				return errors.New("password does not match")
 			}
 
+			if err := ValidatePassword(s, user.Id, password); err != nil {
+				return err
+			}
 			password = encodePassword([]byte(values.Get("password")))
+			if err := InsertPasswordHistory(s, user.Id, password); err != nil {
+				log.Printf("failed to save password history: %v", err)
+				return err
+			}
+
 		}
 
 		avatar := values.Get("avatar")
