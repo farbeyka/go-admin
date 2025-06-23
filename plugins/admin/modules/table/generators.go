@@ -66,8 +66,8 @@ func InsertPasswordHistory(s *SystemTable, userId int64, passwordHash string) er
 }
 
 func ValidatePassword(s *SystemTable, userId int64, password string) error {
-	if len(password) < 8 {
-		return errors.New("Password must be at least 8 characters long")
+	if len(password) < 14 {
+		return errors.New("Password must be at least 14 characters long")
 	}
 
 	hasUpper, _ := regexp.MatchString(`[A-Z]`, password)
@@ -98,16 +98,21 @@ func ValidatePassword(s *SystemTable, userId int64, password string) error {
 			return errors.New("failed to retrieve password history from database"), nil
 		}
 
-		for _, row := range results {
+		for i := 0; i < 24; i++ {
+			if i >= len(results) {
+				break
+			}
+
+			row := results[i]
 			hash, ok := row["password_hash"].(string)
 			if !ok {
 				continue
 			}
+
 			if bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil {
-				return errors.New("You cannot reuse one of the last 10 passwords"), nil
+				return errors.New("You cannot reuse one of the last 24 passwords"), nil
 			}
 		}
-
 		return nil, nil
 	})
 
