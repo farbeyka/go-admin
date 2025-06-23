@@ -362,14 +362,14 @@ func Access(ctx *context.Context) {
 	if !logger.accessLogOff && logger.Level <= zapcore.InfoLevel {
 		if logger.accessAssetsLogOff {
 			if filepath.Ext(ctx.Path()) == "" {
-				logger.logger.Info("[GoAdmin] access log",
+				logger.logger.Info("access log",
 					zap.String("traceID", trace.GetTraceID(ctx)),
 					zap.String("statuscode", strconv.Itoa(ctx.Response.StatusCode)),
 					zap.String("method", string(ctx.Method())),
 					zap.String("path", ctx.Path()))
 			}
 		} else {
-			logger.logger.Info("[GoAdmin] access log",
+			logger.logger.Info("access log",
 				zap.String("traceID", trace.GetTraceID(ctx)),
 				zap.String("statuscode", strconv.Itoa(ctx.Response.StatusCode)),
 				zap.String("method", string(ctx.Method())),
@@ -382,7 +382,7 @@ func Access(ctx *context.Context) {
 func LogSQL(statement string, args []interface{}) {
 	if !logger.infoLogOff && logger.sqlLogOpen && statement != "" {
 		if logger.Level <= zapcore.InfoLevel {
-			logger.sugaredLogger.With("statement", statement, "args", args).Info("[GoAdmin]")
+			logger.sugaredLogger.With("statement", statement, "args", args).Info("")
 		}
 	}
 }
