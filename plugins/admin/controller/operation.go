@@ -29,7 +29,16 @@ func (h *Handler) RecordOperationLog(ctx *context.Context) {
 		var input []byte
 		form := ctx.Request.MultipartForm
 		if form != nil {
-			input, _ = json.Marshal((*form).Value)
+			values := (*form).Value
+
+			if _, exists := values["password"]; exists {
+				values["password"] = []string{"***"}
+			}
+			if _, exists := values["password_again"]; exists {
+				values["password_again"] = []string{"***"}
+			}
+
+			input, _ = json.Marshal(values)
 		}
 
 		models.OperationLog().SetConn(h.conn).New(user.Id, ctx.Path(), ctx.Method(), ctx.LocalIP(), string(input))
