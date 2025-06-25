@@ -48,7 +48,12 @@ func (h *Handler) Auth(ctx *context.Context) {
 			response.BadRequest(ctx, "wrong password or username")
 			return
 		}
-		user, ok = auth.Check(password, username, h.conn)
+
+		var err error
+		user, ok, err = auth.Check(password, username, h.conn)
+		if err != nil {
+			errMsg = err.Error()
+		}
 	} else {
 		user, ok, errMsg = auth.GetService(s).P(ctx)
 	}

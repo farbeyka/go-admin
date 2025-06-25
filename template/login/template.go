@@ -46,6 +46,9 @@ const loginTmpl = `{{define "login_theme1"}}
                                autocomplete="off">
                     </div>
                     <div class="form-group">
+                        <div id="login-error" style="color: red; display: none;"></div>
+                    </div>
+                    <div class="form-group">
                         <button class="btn btn-primary" onclick="submitData()">{{lang "login"}}</button>
                     </div>
                 </form>
@@ -81,8 +84,13 @@ const loginTmpl = `{{define "login_theme1"}}
                     location.href = data.data.url
                 },
                 error: function (data) {
-                    alert('{{lang "login fail"}}');
-                }
+                    let msg = "Login failed";
+                    if (data.responseJSON && data.responseJSON.msg) {
+                       msg = data.responseJSON.msg;
+                    }
+                    alert(msg);
+                    $("#login-error").text(msg).show();
+                 }
             });
         }
     </script>

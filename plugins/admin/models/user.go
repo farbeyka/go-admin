@@ -33,8 +33,10 @@ type UserModel struct {
 	Level         string            `json:"level"`
 	LevelName     string            `json:"level_name"`
 
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
+	CreatedAt       string    `json:"created_at"`
+	UpdatedAt       string    `json:"updated_at"`
+	LoginAttempts   int       `json:"login_attempts"`
+	LastFailedLogin time.Time `json:"last_failed_login"`
 
 	cacheReplacer *strings.Replacer
 }
@@ -411,6 +413,22 @@ func (t UserModel) Update(username, password, name, avatar string, isUpdateAvata
 		Update(fieldValues)
 }
 
+func (t UserModel) UpdateLoginAttempt(attempts int, lastFailed time.Time) UserModel {
+	fieldValues := dialect.H{
+		"login_attempts":    attempts,
+		"last_failed_login": lastFailed.Format(time.RFC3339),
+		"updated_at":        time.Now().Format("2006-01-02 15:04:05"),
+	}
+
+	_, _ = t.WithTx(t.Tx).Table(t.TableName).
+		Where("id", "=", t.Id).
+		Update(fieldValues)
+
+	t.LoginAttempts = attempts
+	t.LastFailedLogin = lastFailed
+	return t
+}
+
 // UpdatePwd update the password of the user model.
 func (t UserModel) UpdatePwd(password string) UserModel {
 
@@ -516,5 +534,27 @@ func (t UserModel) MapToModel(m map[string]interface{}) UserModel {
 	t.RememberToken, _ = m["remember_token"].(string)
 	t.CreatedAt, _ = m["created_at"].(string)
 	t.UpdatedAt, _ = m["updated_at"].(string)
+	if val, ok := m["login_attempts"]; ok {
+		switch v := val.(type) {
+		case int:
+			t.LoginAttempts = v
+		case int64:
+			t.LoginAttempts = int(v)
+		case float64:
+			t.LoginAttempts = int(v)
+		default:
+			logger.Info("unexpected type for login_attempts: %T", val)
+		}
+	}
+
+	if str, ok := m["last_failed_login"].(string); ok {
+		parsed, err := time.Parse(time.RFC3339, str)
+		if err != nil {
+			logger.Info("failed to parse last_failed_login: ", err)
+		} else {
+			t.LastFailedLogin = parsed
+		}
+	}
+
 	return t
 }

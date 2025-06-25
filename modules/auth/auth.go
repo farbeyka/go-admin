@@ -5,8 +5,10 @@
 package auth
 
 import (
+	"fmt"
 	"log"
 	"sync"
+	"time"
 
 	"github.com/farbeyka/go-admin/modules/db/dialect"
 	"github.com/farbeyka/go-admin/modules/logger"
@@ -25,21 +27,45 @@ func Auth(ctx *context.Context) models.UserModel {
 }
 
 // Check check the password and username and return the user model.
-func Check(password string, username string, conn db.Connection) (user models.UserModel, ok bool) {
-
+func Check(password, username string, conn db.Connection) (user models.UserModel, ok bool, err error) {
 	user = models.User().SetConn(conn).FindByUserName(username)
 
 	if user.IsEmpty() {
 		ok = false
-	} else {
-		if comparePassword(password, user.Password) {
-			ok = true
-			user = user.WithRoles().WithPermissions().WithMenus()
-			user.UpdatePwd(EncodePassword([]byte(password)))
-		} else {
-			ok = false
-		}
+		return
 	}
+
+	now := time.Now()
+
+	lockDuration := 15 * time.Minute
+	elapsed := now.Sub(user.LastFailedLogin)
+
+	if elapsed < 0 {
+		elapsed = lockDuration
+	}
+
+	// Блокировка на 15 минут
+	if user.LoginAttempts >= 5 && elapsed < lockDuration {
+		err = fmt.Errorf("user is locked, try again in %.0f minutes", (lockDuration - elapsed).Minutes())
+		ok = false
+		return
+	}
+
+	if comparePassword(password, user.Password) {
+		ok = true
+		user = user.WithRoles().WithPermissions().WithMenus()
+
+		_ = user.UpdateLoginAttempt(0, time.Time{})
+		_ = user.UpdatePwd(EncodePassword([]byte(password)))
+		return
+	}
+
+	newAttempts := user.LoginAttempts + 1
+	_ = user.UpdateLoginAttempt(newAttempts, now)
+
+	remaining := 5 - newAttempts
+	err = fmt.Errorf("wrong user or password, %d attempt(s) left", max(remaining, 0))
+	ok = false
 	return
 }
 
