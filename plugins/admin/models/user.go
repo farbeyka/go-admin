@@ -379,7 +379,7 @@ func (t UserModel) New(username, password, name, avatar string) (UserModel, erro
 	if err != nil {
 		return t, err
 	}
-	_, err = t.WithTx(t.Tx).Table("user_password_history").Insert(dialect.H{
+	_, err = t.WithTx(t.Tx).Table("goadmin_password_history").Insert(dialect.H{
 		"user_id":       t.Id,
 		"password_hash": t.Password,
 	})

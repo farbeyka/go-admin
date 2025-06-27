@@ -51,7 +51,7 @@ var filterType = types.FilterType{NoIcon: true, HeadWidth: 4, InputWidth: 8}
 func InsertPasswordHistory(s *SystemTable, userId int64, passwordHash string) error {
 	_, err := s.connection().WithTransaction(func(tx *sql.Tx) (error, map[string]interface{}) {
 		_, err := s.connection().WithTx(tx).
-			Table("user_password_history").
+			Table("goadmin_password_history").
 			Insert(dialect.H{
 				"user_id":       userId,
 				"password_hash": passwordHash,
@@ -89,7 +89,7 @@ func ValidatePassword(s *SystemTable, userId int64, password string) error {
 
 	_, err := s.connection().WithTransaction(func(tx *sql.Tx) (error, map[string]interface{}) {
 		results, err := s.connection().WithTx(tx).
-			Table("user_password_history").
+			Table("goadmin_password_history").
 			Where("user_id", "=", userId).
 			OrderBy("created_at", "desc").
 			All()
@@ -216,7 +216,7 @@ func (s *SystemTable) GetManagerTable(ctx *context.Context) (managerTable Table)
 				}
 
 				deleteUserPasswordHistoryErr := s.connection().WithTx(tx).
-					Table("user_password_history").
+					Table("goadmin_password_history").
 					WhereIn("user_id", ids).
 					Delete()
 
@@ -530,7 +530,7 @@ func (s *SystemTable) GetNormalManagerTable(ctx *context.Context) (managerTable 
 				}
 
 				deleteUserPasswordHistoryErr := s.connection().WithTx(tx).
-					Table("user_password_history").
+					Table("goadmin_password_history").
 					WhereIn("user_id", ids).
 					Delete()
 				logger.Info("delete from password_history")

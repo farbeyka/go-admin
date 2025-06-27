@@ -551,7 +551,7 @@ func (sql *SQL) Exec() (int64, error) {
 	return res.LastInsertId()
 }
 
-const postgresInsertCheckTableName = "goadmin_menu|goadmin_permissions|goadmin_roles|goadmin_users"
+const postgresInsertCheckTableName = "goadmin_menu|goadmin_permissions|goadmin_roles|goadmin_users|goadmin_password_history"
 
 // Insert exec the insert method of given key/value pairs.
 func (sql *SQL) Insert(values dialect.H) (int64, error) {
