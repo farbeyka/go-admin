@@ -126,6 +126,10 @@ func (s *SystemTable) GetManagerTable(ctx *context.Context) (managerTable Table)
 
 	formList.SetPostValidator(func(values form2.Values) error {
 		password := values.Get("password")
+		if password == "" {
+			return nil
+		}
+
 		user := models.UserWithId(values.Get("id")).SetConn(s.conn)
 
 		if err := ValidatePassword(s, user.Id, password); err != nil {
