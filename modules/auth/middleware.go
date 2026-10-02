@@ -7,6 +7,7 @@ package auth
 import (
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/farbeyka/go-admin/context"
 	"github.com/farbeyka/go-admin/modules/config"
@@ -49,38 +50,24 @@ func DefaultInvoker(conn db.Connection) *Invoker {
 				}, ``)
 				return
 			}
-			param := ""
-			if ref := ctx.Referer(); ref != "" {
-				param = "?ref=" + url.QueryEscape(ref)
-			}
+			param := "?ref=" + url.QueryEscape(ctx.Request.URL.RequestURI())
 
 			u := config.Url(config.GetLoginUrl() + param)
-			_, err := ctx.Request.Cookie(DefaultCookieKey)
-			referer := ctx.Referer()
+			ctx.SetCookie(&http.Cookie{
+				Name:     DefaultCookieKey,
+				Path:     "/",
+				MaxAge:   -1,
+				Expires:  time.Unix(1, 0),
+				HttpOnly: true,
+			})
 
-			if (ctx.Headers(constant.PjaxHeader) == "" && ctx.Method() != "GET") ||
-				err != nil ||
-				referer == "" {
+			if ctx.Headers(constant.PjaxHeader) == "" {
 				ctx.Write(302, map[string]string{
 					"Location": u,
 				}, ``)
 			} else {
-				msg := language.Get("login overdue, please login again")
 				ctx.HTML(http.StatusOK, `<script>
-	if (typeof(swal) === "function") {
-		swal({
-			type: "info",
-			title: "`+language.Get("login info")+`",
-			text: "`+msg+`",
-			showCancelButton: false,
-			confirmButtonColor: "#3c8dbc",
-			confirmButtonText: '`+language.Get("got it")+`',
-        })
-		setTimeout(function(){ location.href = "`+u+`"; }, 3000);
-	} else {
-		alert("`+msg+`")
-		location.href = "`+u+`"
-    }
+	window.location.replace("`+u+`")
 </script>`)
 			}
 		},
